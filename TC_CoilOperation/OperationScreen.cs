@@ -185,6 +185,10 @@ namespace TC_CoilOperation
 
 
     int LabelNo = 0;
+        // timer重入防止フラグ // 非同期化、重い処理をバックグラウンド実行に変更 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+        private volatile bool _ioProcessing = false;
+        private volatile bool _rfidProcessing = false;
+        private volatile bool _coordinateProcessing = false;
         public OperationScreen()
         {
             InitializeComponent();
@@ -3520,49 +3524,57 @@ namespace TC_CoilOperation
                     manualOpen.Visible = true;
                     manuaClose.Visible = true;
                 }
-            }
-           
+            }           
         }
-
-
 
         /// <summary>
         /// 画面更新処理
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void timer1_Tick(object sender, EventArgs e)
+        private async void timer1_Tick(object sender, EventArgs e)  // 非同期化、重い処理をバックグラウンド実行に変更 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+        //private void timer1_Tick(object sender, EventArgs e)      // 2026/03/27 OGURI DEL（ver1.1.0.0対応）
         {
-           
+            if (_coordinateProcessing) return; // 重入防止フラグを追加して二重実行を防止 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+            _coordinateProcessing = true;
             Coordinate_timer.Stop();
-            if (Crane_point_x!=-99999 && Crane_point_x != -99998 && Crane_point_y!=-99999 && Crane_point_y != -99998 && Crane_point_z!=-99999 && Crane_point_z != -99998) 
+            try // try-finallyブロックを追加してフラグのリセットとタイマーの再開を確実に行うように変更 2026/03/27 OGURI ADD（ver1.1.0.0対応）
             {
-                ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(2);
-            }
-           
-            //警告音
-            //if (caveat == "2")
-            //{
-            //    //警告音を鳴らす
-            //    ((MainScreen)Application.OpenForms["MainScreen"]).MP3("2");
-            //    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(12);
-            //    caveatflag = "1";
-            //}
-            //else if (caveat == "1")
-            //{
-            //    //注意音を鳴らす
-            //    ((MainScreen)Application.OpenForms["MainScreen"]).MP3("1");
-            //    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(13);
-            //    caveatflag = "1";
-            //}
-            //else if (caveat == "0" && caveatflag == "1")
-            //{
-            //    caveatflag = "0";
-            //    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-            //}
+                if (Crane_point_x != -99999 && Crane_point_x != -99998 && Crane_point_y != -99999 && Crane_point_y != -99998 && Crane_point_z != -99999 && Crane_point_z != -99998)
+                    {
+                    try
+                    {
+                        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(2);
+                    }
+                    catch (Exception ex)
+                    {
+                        ((MainScreen)Application.OpenForms["MainScreen"]).System_log("OracleDBsql(2) failed: " + ex.Message, "2", "DB", "Oracle"); // 異常発生時ログ出力 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+                    }
+                }
 
-            //button2.Text = OperationScreen.testtest;//削除
-            if (Properties.Settings.Default.Lifter_Manualmode == true) { bit1.Visible = false; bit2.Visible = false; }
+                //警告音
+                //if (caveat == "2")
+                //{
+                //    //警告音を鳴らす
+                //    ((MainScreen)Application.OpenForms["MainScreen"]).MP3("2");
+                //    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(12);
+                //    caveatflag = "1";
+                //}
+                //else if (caveat == "1")
+                //{
+                //    //注意音を鳴らす
+                //    ((MainScreen)Application.OpenForms["MainScreen"]).MP3("1");
+                //    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(13);
+                //    caveatflag = "1";
+                //}
+                //else if (caveat == "0" && caveatflag == "1")
+                //{
+                //    caveatflag = "0";
+                //    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
+                //}
+
+                //button2.Text = OperationScreen.testtest;//削除
+                if (Properties.Settings.Default.Lifter_Manualmode == true) { bit1.Visible = false; bit2.Visible = false; }
             else { bit1.Visible = true; bit2.Visible = true; }
             if (bit1value == true)
             {
@@ -3575,22 +3587,6 @@ namespace TC_CoilOperation
                 bit2.Checked = true;
             }
             else { bit2.Checked = false; }
-            //もしかしたらフラグチェックでストップ
-            /*クレーン位置test用
-            //testCrane_point_x++;
-            //testCrane_point_y++;
-            //if (testCrane_point_x == 15)
-            //{
-            //    testCrane_point_x = 1;
-            //}
-            //if (testCrane_point_y == 15)
-            //{
-            //    testCrane_point_y = 1;
-            //}
-            //Location_x=Convert.ToString(Convert.ToInt32(Location_x) + testCrane_point_x);
-            //Location_y = Convert.ToString(1);
-            */
-
 
             //クレーン距離表示
             if (Crane_point_x == -99999 || Crane_point_x == -99998)
@@ -3609,16 +3605,11 @@ namespace TC_CoilOperation
                     Xerrcount = 0;
                     ((MainScreen)Application.OpenForms["MainScreen"]).System_log("X軸値再取得確認", "1", "距離計値取得処理", "xlazer");
                 }
-                //double pointx = Crane_point_x;
-                //pointx = pointx * 0.001;
-                //string Xpoint = Convert.ToString(pointx).ToString("0.0");
 
                 Crane_point_x = Crane_point_x / 100;
                 double Crane_point_dx = Crane_point_x;
                 //フォーマット変更
                 CRP.Text = Convert.ToString(Crane_point_dx / 10);
-
-
             }
             if (Crane_point_y == -99999|| Crane_point_y == -99998)
             {
@@ -3652,8 +3643,6 @@ namespace TC_CoilOperation
                 CHgt.Text = "-";
             }
             else {
-               
-
                 if (Zerrcount == 1)
                 {
                     Zerrcount = 0;
@@ -3667,7 +3656,6 @@ namespace TC_CoilOperation
             //クレーンロケーション表示
             if (CRP.Text == "-" || CRun.Text == "-" || CHgt.Text == "-")
             {
-
                 CCol.Text = "-";
                 CCom.Text = "-";
                 CSt.Text = "-";
@@ -3678,23 +3666,6 @@ namespace TC_CoilOperation
                 CCom.Text = Convert.ToString(Location_y);
                 CSt.Text = Convert.ToString(Location_z);
             }
-            //  Location_x = "-";//test
-            //Location_y = "1";//test
-            //Location_z = "1";//test
-
-
-
-
-            // CRun.Text = "1";//test
-            //CCom.Text = "1";//test
-            //CHgt.Text = "1";//test
-            //Location_x = "1";//test
-            //Location_y = "1";//test
-            //Crane_y = "1";//test
-            //Location_z = "1";//test
-
-            //coil_view[Crane_x, Crane_y].Value ==
-            //ここのロジック修正
             if (Crane_check.Checked == true)
             {
                 //フリーエリアの場合の処理追加//20240610 山﨑
@@ -3710,10 +3681,8 @@ namespace TC_CoilOperation
                     }
                 }
                 else { 
-
                     if (CLocation_x != "-" && CLocation_y != "-" && CLocation_x != "99" && CLocation_x != "98")
                     {
-
                         if (Convert.ToString(coil_view[Convert.ToInt32(CLocation_x) - 1, Convert.ToInt32(CLocation_y) - 1].Value) != "●")
                         {
                             if (mozi != "-")
@@ -3721,7 +3690,6 @@ namespace TC_CoilOperation
                                 coil_view[Convert.ToInt32(Crane_x) - 1, Convert.ToInt32(Crane_y) - 1].Value = mozi;
                             }
                             mozi = Convert.ToString(coil_view[Convert.ToInt32(CLocation_x) - 1, Convert.ToInt32(CLocation_y) - 1].Value);
-
 
                             coil_view[Convert.ToInt32(CLocation_x) - 1, Convert.ToInt32(CLocation_y) - 1].Value = "●";
                             Crane_x = CLocation_x;
@@ -3738,12 +3706,8 @@ namespace TC_CoilOperation
                         {
                             coil_view[Convert.ToInt32(Crane_x) - 1, Convert.ToInt32(Crane_y) - 1].Value = "";
                         }
-
                     }
                 }
-                
-                    
-                
             }
            
             if (Properties.Settings.Default.Lifter_Manualmode == false)
@@ -3753,7 +3717,6 @@ namespace TC_CoilOperation
                     manualOpen.Visible = false;
                     manuaClose.Visible = false;
                 }
-
             }
             else
             {
@@ -3763,8 +3726,14 @@ namespace TC_CoilOperation
                     manuaClose.Visible = true;
                 }
             }
-            Coordinate_timer.Interval = 300;
-            Coordinate_timer.Start();
+                Coordinate_timer.Interval = 300;
+                //Coordinate_timer.Start(); // finallyに移動 2026/03/27 OGURI DEL（ver1.1.0.0対応）
+            }
+            finally
+            {
+                Coordinate_timer.Start();
+                _coordinateProcessing = false;
+            }
         }
 
         private void refresh_timer_Tick(object sender, EventArgs e)
@@ -3774,199 +3743,205 @@ namespace TC_CoilOperation
             //disp();
             //refresh_timer.Start();
         }
+
         /// <summary>
         /// タグ読み取り処理
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void RFIDtimer_Tick(object sender, EventArgs e)
+        private async void RFIDtimer_Tick(object sender, EventArgs e)   // 非同期化、重い処理をバックグラウンド実行に変更 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+        //private void RFIDtimer_Tick(object sender, EventArgs e)       //  2026/03/27 OGURI DEL（ver1.1.0.0対応）
         {
+            if (_rfidProcessing) return; // 重入防止フラグを追加して二重実行を防止 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+            _rfidProcessing = true;
             RFIDtimer.Stop();
-           
 
             //もしかしたらフラグチェックでストップ
-            string result = send_http_message(g_read_cmd_header + "4getlist");
-            //テストプログラム
-            //for(int i = 0; i < tagname.Length; i++)
-            //{
-            //    最終タグ読み取り数.Items.Add(tagname[i]);
-            //}
-            //ここまで
+            try // try-finallyブロックを追加してフラグのリセットとタイマーの再開を確実に行うように変更 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+            {
+                var result = await Task.Run(() => send_http_message(g_read_cmd_header + "4getlist"));// 非同期でHTTPリクエストを送信して結果を取得 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+                // string result = send_http_message(g_read_cmd_header + "4getlist");
+                //テストプログラム
+                //for(int i = 0; i < tagname.Length; i++)
+                //{
+                //    最終タグ読み取り数.Items.Add(tagname[i]);
+                //}
+                //ここまで
 
-            //if (json_get(result, "status").StartsWith("stopped") && RFIDflag == false)
-              if (true)
+                //if (json_get(result, "status").StartsWith("stopped") && RFIDflag == false)
+                if (true)
                 {
-                coilpointX = -99999;             //コイル座標X
-                coilpointY = -99999;             //コイル座標Y
-                coilpointZ = -99999;             //コイル座標Z
-                coillocX = "0";               //コイルロケX
-                coillocY = "0";               //コイルロケY
-                coillocZ = "0";               //コイルロケZ
-                coilloc = "0-0-0";            //コイルロケ
-                ClenpointX = Crane_point_x; //クレーン座標X
-                ClenpointY = Crane_point_y; //クレーン座標Y
-                ClenpointZ = Crane_point_z; //クレーン座標Z
-               
-                現品番号 = "現品情報無し";
-                //string f = tagname[0];
-                //string b = tagname[1];
-                //string c = tagname[2];
-                //string d = tagname[3];
-                if (tagname[0] != string.Empty)
-                {
-                    RFIDContinuousflag = false;
-                    Properties.Settings.Default.antena_decibel = def_decibel;
-                    if (tagname[1] == string.Empty)//単体読み
+                    coilpointX = -99999;        //コイル座標X
+                    coilpointY = -99999;        //コイル座標Y
+                    coilpointZ = -99999;        //コイル座標Z
+                    coillocX = "0";             //コイルロケX
+                    coillocY = "0";             //コイルロケY
+                    coillocZ = "0";             //コイルロケZ
+                    coilloc = "0-0-0";          //コイルロケ
+                    ClenpointX = Crane_point_x; //クレーン座標X
+                    ClenpointY = Crane_point_y; //クレーン座標Y
+                    ClenpointZ = Crane_point_z; //クレーン座標Z
+
+                    現品番号 = "現品情報無し";
+                    //string f = tagname[0];
+                    //string b = tagname[1];
+                    //string c = tagname[2];
+                    //string d = tagname[3];
+                    if (tagname[0] != string.Empty)
                     {
-                        tagId = tagname[0];
-                        //ここからDB等の処理に移行
-                        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(22);
-                        if (coilpointX != -99999 && coilpointY != -99999 && coilpointZ != -99999)//ロケデータが存在するか？
+                        RFIDContinuousflag = false;
+                        Properties.Settings.Default.antena_decibel = def_decibel;
+                        if (tagname[1] == string.Empty)//単体読み
                         {
-                            if (coilpointX >= Crane_point_x - Properties.Settings.Default.X_sikiti && coilpointX <= Crane_point_x + Properties.Settings.Default.X_sikiti && coilpointY >= Crane_point_y - Properties.Settings.Default.Y_sikiti && coilpointY <= Crane_point_y + Properties.Settings.Default.Y_sikiti && coilpointZ >= Crane_point_z - Properties.Settings.Default.Z_sikiti && coilpointZ <= Crane_point_z + Properties.Settings.Default.Z_sikiti)
+                            tagId = tagname[0];
+                            //ここからDB等の処理に移行
+                            ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(22);
+                            if (coilpointX != -99999 && coilpointY != -99999 && coilpointZ != -99999)//ロケデータが存在するか？
                             {
-                               
-                                ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
-                                RFIDflag = true;
-                                RFIDcount = 0;
-                                RFIDtimer.Enabled = false;
-                                //RFIDContinuousflag = false;
-                                tagreadcnt = 0;
-                                ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-                            }
-                            else//MSG１
-                            {
-                                if (coilloc == "0-0-0")
+                                if (coilpointX >= Crane_point_x - Properties.Settings.Default.X_sikiti && coilpointX <= Crane_point_x + Properties.Settings.Default.X_sikiti && coilpointY >= Crane_point_y - Properties.Settings.Default.Y_sikiti && coilpointY <= Crane_point_y + Properties.Settings.Default.Y_sikiti && coilpointZ >= Crane_point_z - Properties.Settings.Default.Z_sikiti && coilpointZ <= Crane_point_z + Properties.Settings.Default.Z_sikiti)
                                 {
-                                    coilloc = "ロケ情報なし";
-                                }
-                                //メッセージボックスを表示する
-                                Clocation = Location_x + "-" + Location_y + "-" + Location_z;
-                                ShowMSG = MSG1;
-                                //重複起動処理フラグ追加　20240626 山﨑
-                                重複処理フラグ = true;
-                                //ここまで
-                                CoilShowDialog coilShow = new CoilShowDialog();
-                                coilShow.ShowDialog();
-                                if (tagId != "-")
-                                {
+
                                     ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
-                                    // RFIDflag = true;
+                                    RFIDflag = true;
                                     RFIDcount = 0;
-                                    // RFIDtimer.Enabled = false;
+                                    RFIDtimer.Enabled = false;
+                                    //RFIDContinuousflag = false;
+                                    tagreadcnt = 0;
+                                    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
+                                }
+                                else//MSG１
+                                {
+                                    if (coilloc == "0-0-0")
+                                    {
+                                        coilloc = "ロケ情報なし";
+                                    }
+                                    //メッセージボックスを表示する
+                                    Clocation = Location_x + "-" + Location_y + "-" + Location_z;
+                                    ShowMSG = MSG1;
+                                    //重複起動処理フラグ追加　20240626 山﨑
+                                    重複処理フラグ = true;
+                                    //ここまで
+                                    CoilShowDialog coilShow = new CoilShowDialog();
+                                    coilShow.ShowDialog();
+                                    if (tagId != "-")
+                                    {
+                                        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
+                                        // RFIDflag = true;
+                                        RFIDcount = 0;
+                                        // RFIDtimer.Enabled = false;
+                                        //RFIDContinuousflag = false;
+                                        tagreadcnt = 0;
+                                        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
+                                    }
+                                    else
+                                    {
+                                        RFIDContinuousflag = true;
+                                        RFIDcount = 2;
+
+
+                                        tagreadcnt = 0;
+                                        RFIDcount = 0;
+                                        RFIDtimer.Enabled = false;
+                                        IOflag = false;
+                                        if (Properties.Settings.Default.Lifter_Manualmode == true && tagreadcnt != 0)
+                                        {
+                                            //  manuaClose.PerformClick();
+                                        }
+                                        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
+                                        return;
+                                        //}
+
+
+                                    }
+
+                                }
+                            }
+                            else//MSG2
+                            {
+                                if (Location_x == "-" || Location_y == "-" || Location_z == "-")//ロケーション外
+                                {
+
+                                    ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
+                                    RFIDflag = true;
+                                    RFIDcount = 0;
+                                    RFIDtimer.Enabled = false;
                                     //RFIDContinuousflag = false;
                                     tagreadcnt = 0;
                                     ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
                                 }
                                 else
                                 {
-                                    RFIDContinuousflag = true;
-                                    RFIDcount = 2;
+                                    Clocation = Location_x + "-" + Location_y + "-" + Location_z;
+                                    ShowMSG = MSG2;
 
+                                    //重複起動処理フラグ追加　20240626 山﨑
+                                    重複処理フラグ = true;
+                                    //ここまで
 
-                                    tagreadcnt = 0;
-                                    RFIDcount = 0;
-                                    RFIDtimer.Enabled = false;
-                                    IOflag = false;
-                                    if (Properties.Settings.Default.Lifter_Manualmode == true && tagreadcnt != 0)
+                                    CoilShowDialog coilShow = new CoilShowDialog();
+                                    coilShow.ShowDialog();
+                                    if (tagId != "-")
                                     {
-                                        //  manuaClose.PerformClick();
-                                    }
+
+                                        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
+                                        // RFIDflag = true;
+                                        RFIDcount = 0;
+                                        // RFIDtimer.Enabled = false;
+                                        //RFIDContinuousflag = false;
+                                        tagreadcnt = 0;
                                         ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-                                    return;
-                                    //}
+                                    }
+                                    else
+                                    {
+                                        RFIDContinuousflag = true;
+                                        RFIDcount = 2;
 
 
+                                        tagreadcnt = 0;
+                                        RFIDcount = 0;
+                                        RFIDtimer.Enabled = false;
+                                        IOflag = false;
+                                        if (Properties.Settings.Default.Lifter_Manualmode == true && tagreadcnt != 0)
+                                        {
+                                            //  manuaClose.PerformClick();
+                                        }
+                                        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
+                                        return;
+                                        //}
+
+
+                                    }
                                 }
-
                             }
+
                         }
-                        else//MSG2
+                        else //複数読み
                         {
-                            if (Location_x == "-" || Location_y == "-" || Location_z == "-")//ロケーション外
+                            ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
+                            Clocation = Location_x + "-" + Location_y + "-" + Location_z;
+
+                            //重複起動処理フラグ追加　20240626 山﨑
+                            重複処理フラグ = true;
+                            //ここまで
+
+                            multicoil coil = new multicoil();
+                            coil.ShowDialog();
+                            if (tagId != "-")
                             {
-                               
                                 ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
-                                RFIDflag = true;
+                                // RFIDflag = true;
                                 RFIDcount = 0;
-                                RFIDtimer.Enabled = false;
+                                // RFIDtimer.Enabled = false;
                                 //RFIDContinuousflag = false;
                                 tagreadcnt = 0;
                                 ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
                             }
                             else
                             {
-                                Clocation = Location_x + "-" + Location_y + "-" + Location_z;
-                                ShowMSG = MSG2;
-
-                                //重複起動処理フラグ追加　20240626 山﨑
-                                重複処理フラグ = true;
-                                //ここまで
-
-                                CoilShowDialog coilShow = new CoilShowDialog();
-                                coilShow.ShowDialog();
-                                if (tagId != "-")
-                                {
-                                    
-                                    ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
-                                    // RFIDflag = true;
-                                    RFIDcount = 0;
-                                    // RFIDtimer.Enabled = false;
-                                    //RFIDContinuousflag = false;
-                                    tagreadcnt = 0;
-                                    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-                                }
-                                else
-                                {
-                                    RFIDContinuousflag = true;
-                                    RFIDcount = 2;
+                                RFIDContinuousflag = true;
+                                RFIDcount = 2;
 
 
-                                    tagreadcnt = 0;
-                                    RFIDcount = 0;
-                                    RFIDtimer.Enabled = false;
-                                    IOflag = false;
-                                    if (Properties.Settings.Default.Lifter_Manualmode == true && tagreadcnt != 0)
-                                    {
-                                        //  manuaClose.PerformClick();
-                                    }
-                                        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-                                    return;
-                                    //}
-
-
-                                }
-                            }
-                        }
-
-                    }
-                    else //複数読み
-                    {
-                        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-                        Clocation = Location_x + "-" + Location_y + "-" + Location_z;
-
-                        //重複起動処理フラグ追加　20240626 山﨑
-                        重複処理フラグ = true;
-                        //ここまで
-                        
-                        multicoil coil = new multicoil();
-                        coil.ShowDialog();
-                        if (tagId != "-")
-                        {
-                            ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
-                            // RFIDflag = true;
-                            RFIDcount = 0;
-                            // RFIDtimer.Enabled = false;
-                            //RFIDContinuousflag = false;
-                            tagreadcnt = 0;
-                            ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-                        }
-                        else
-                        {
-                            RFIDContinuousflag = true;
-                            RFIDcount = 2;
-
-                          
                                 tagreadcnt = 0;
                                 RFIDcount = 0;
                                 RFIDtimer.Enabled = false;
@@ -3977,37 +3952,106 @@ namespace TC_CoilOperation
                                 }
                                 ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
                                 return;
-                            //}
+                                //}
 
 
+                            }
+                        }
+                        //以下複数読みテストプログラム
+                        //string c;//タグIDチェック用変数
+                        //for (int i = 1; i < tagname.Length; i++) {
+
+                        //    if (tagname[i] == string.Empty)
+                        //    {
+                        //        break;
+                        //    }
+                        //    c = Convert.ToString(tagname[i]).Substring(0, 14);
+                        //    if (c != Properties.Settings.Default.tagID)
+                        //    { continue; }
+
+                        //    else if (tagname[0] != tagname[i])
+                        //    {
+                        //        RFIDflag = true;
+                        //        RFIDcount = 0;
+                        //        RFIDtimer.Enabled = false;
+                        //        //RFIDContinuousflag = false;
+                        //        tagreadcnt = 0;
+                        //        multitagflag = true;
+                        //        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(30);
+
+                        //    }
+
+                    }
+                    else if (tagname[0] == string.Empty)
+                    {
+                        RFIDContinuousflag = true;
+                        RFIDcount = 2;
+
+                        if (RFIDcount == 2)
+                        {
+
+                            //ここに出力上げる処理
+                            tagreadcnt++;
+                            if (tagreadcnt == 1)
+                            {
+                                Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_A;
+                            }
+                            else if (tagreadcnt == 2)
+                            {
+                                Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_B;
+                            }
+                            else if (tagreadcnt == 3)
+                            {
+                                Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_C;
+                            }
+                            else if (tagreadcnt == 4)
+                            {
+                                Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_D;
+                            }
+                            else if (tagreadcnt == 5)
+                            {
+                                Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_E;
+                            }
+                            else
+                            {
+                                Properties.Settings.Default.antena_decibel = def_decibel;
+                                tagreadcnt = 0;
+                                // MessageBox.Show("TEST RFIDタグを読み取れませんでした");
+                                ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
+                            }
+                            RFIDcount = 0;
+                            RFIDtimer.Enabled = false;
+                            IOflag = false;
+                            if (Properties.Settings.Default.Lifter_Manualmode == true && tagreadcnt != 0)
+                            {
+                                manuaClose.PerformClick();
+                            }
+                            return;
                         }
                     }
-                    //以下複数読みテストプログラム
-                    //string c;//タグIDチェック用変数
-                    //for (int i = 1; i < tagname.Length; i++) {
+                    //ここまで
 
-                    //    if (tagname[i] == string.Empty)
-                    //    {
-                    //        break;
-                    //    }
-                    //    c = Convert.ToString(tagname[i]).Substring(0, 14);
-                    //    if (c != Properties.Settings.Default.tagID)
-                    //    { continue; }
+                    //string b = Convert.ToString(tagname[0]).Substring(0, 14);
+                    //if (b == Properties.Settings.Default.tagID)
+                    //{
+                    //string h = Convert.ToString(tagname[0]).Substring(22, 7);
+                    //tagID.Text = h.Replace("-", "");
+                    //tagId = h.Replace("-", "");
 
-                    //    else if (tagname[0] != tagname[i])
-                    //    {
-                    //        RFIDflag = true;
-                    //        RFIDcount = 0;
-                    //        RFIDtimer.Enabled = false;
-                    //        //RFIDContinuousflag = false;
-                    //        tagreadcnt = 0;
-                    //        multitagflag = true;
-                    //        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(30);
 
-                    //    }
+                    ////ここからDB等の処理に移行
+                    //((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
+                    //RFIDflag = true;
+                    //RFIDcount = 0;
+                    //RFIDtimer.Enabled = false;
+                    ////RFIDContinuousflag = false;
+                    //tagreadcnt = 0;
+                    //((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
+
+                    // }
 
                 }
-                else if (tagname[0]==string.Empty)
+                else
                 {
                     RFIDContinuousflag = true;
                     RFIDcount = 2;
@@ -4054,286 +4098,210 @@ namespace TC_CoilOperation
                         return;
                     }
                 }
-                    //ここまで
-                   
-                    //string b = Convert.ToString(tagname[0]).Substring(0, 14);
-                    //if (b == Properties.Settings.Default.tagID)
-                    //{
-                        //string h = Convert.ToString(tagname[0]).Substring(22, 7);
-                        //tagID.Text = h.Replace("-", "");
-                        //tagId = h.Replace("-", "");
-                        
-                        
-                        ////ここからDB等の処理に移行
-                        //((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
-                        //RFIDflag = true;
-                        //RFIDcount = 0;
-                        //RFIDtimer.Enabled = false;
-                        ////RFIDContinuousflag = false;
-                        //tagreadcnt = 0;
-                        //((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-                        
-                   // }
-
-                }
-                else
-                {
-                    RFIDContinuousflag = true;
-                    RFIDcount=2;
-
-                    if (RFIDcount == 2)
-                    {
-
-                        //ここに出力上げる処理
-                        tagreadcnt++;
-                        if (tagreadcnt == 1)
-                        {
-                            Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_A;
-                        }
-                        else if (tagreadcnt == 2)
-                        {
-                            Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_B;
-                        }
-                        else if (tagreadcnt == 3)
-                        {
-                            Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_C;
-                        }
-                        else if (tagreadcnt == 4)
-                        {
-                            Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_D;
-                        }
-                        else if (tagreadcnt == 5)
-                        {
-                            Properties.Settings.Default.antena_decibel = Properties.Settings.Default.antena_decibel_E;
-                        }
-                        else
-                        {
-                            Properties.Settings.Default.antena_decibel = def_decibel;
-                            tagreadcnt = 0;
-                            // MessageBox.Show("TEST RFIDタグを読み取れませんでした");
-                            ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-                        }
-                        RFIDcount = 0;
-                        RFIDtimer.Enabled = false;
-                        IOflag = false;
-                        if (Properties.Settings.Default.Lifter_Manualmode == true && tagreadcnt != 0)
-                        {
-                            manuaClose.PerformClick();
-                        }
-                        return;
-                    }
-                    
-                }
                 //show_status();
-            
-        
-            if (Properties.Settings.Default.Lifter_Manualmode == false)
-            {
-                if (IOmode != 2)
-                {
-                    IOCheckflag = false;
-                   // ((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(2, Convert.ToString(IOCheckflag));//テストプログラム
-                   
-                    IOmode = 0;
-                    //((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(3, Convert.ToString(IOmode));//テストプログラム
-                }
-                IO.Start();
-            }
 
+                if (Properties.Settings.Default.Lifter_Manualmode == false)
+                {
+                    if (IOmode != 2)
+                    {
+                        IOCheckflag = false;
+                        //((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(2, Convert.ToString(IOCheckflag));//テストプログラム
+
+                        IOmode = 0;
+                        //((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(3, Convert.ToString(IOmode));//テストプログラム
+                    }
+                    IO.Start();
+                }
+            }
+            finally
+            {
+                RFIDtimer.Start();
+                _rfidProcessing = false;
+            }
         }
-        
+
         /// <summary>
         /// IO処理　閉じたときはタグの読み取りを行い、開いた時はコイルの位置を確定させる
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void IO_Tick(object sender, EventArgs e)
+        private async void IO_Tick(object sender, EventArgs e)  // 非同期化、重い処理をバックグラウンド実行に変更 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+        //private void IO_Tick(object sender, EventArgs e)      // 2026/03/27 OGURI DEL（ver1.1.0.0対応）
         {
-            
+            if (_ioProcessing) return; // 重入防止フラグを追加して二重実行を防止 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+            _ioProcessing = true;
             //bool 設定1;//テストプログラム
             //bool 設定2;//テストプログラム
             //もしかしたらフラグチェックでストップ
             IO.Enabled=false;
-            read_IO();
+            try // try-finallyブロックを追加してフラグのリセットとタイマーの再開を確実に行うように変更 2026/03/27 OGURI ADD（ver1.1.0.0対応）
+            {
+                read_IO();
             //----------------------------------------------------------------------------------
             //2024.06.17 morichika
             io_process();
 
-            //bool IOpingflag = true;
-            //((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(4, "タイマーストップ");//テストプログラム
-            //test5.Text = "flag="+Convert.ToString(IOCheckflag) + ":mode="+Convert.ToString(IOmode) + ":ID="+tagId;
-            //IOCheckflag = true;//テストプログラム
-            ////IOmode = 1;//テストプログラム
+                //bool IOpingflag = true;
+                //((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(4, "タイマーストップ");//テストプログラム
+                //test5.Text = "flag="+Convert.ToString(IOCheckflag) + ":mode="+Convert.ToString(IOmode) + ":ID="+tagId;
+                //IOCheckflag = true;//テストプログラム
+                ////IOmode = 1;//テストプログラム
 
+                //コメントアウト
+                //if (IOCheckflag == true && IOmode == 1 && tagId == "-")//閉じたとき
+                //{
+                //    //テストプログラム
+                //    //タグ読み取り数.Items.Clear();
+                //    //最終タグ読み取り数.Items.Clear();
+                //    //ここまで
+                //   // IOcount++;
+                //    //test1.Text = "RFID処理開始　"+IOcount;
+                //    for (int i = 0; i < tagname.Length; i++)
+                //    {
+                //        tagname[i] = "";
+                //    }
+                //    tagcount = 0;
+                //    if(exec_set_commands("/reader/inventory/012setconfig?get_chanid_flg=1&get_phase_flg=1&get_seentime_flg=1&stop_timer=" + Properties.Settings.Default.antena_stoptime) == false)
+                //    {
+                //        IOpingflag = false;
+                //        //test3.Text = Convert.ToString(false);
+                //    }
+                //    else
+                //    {
+                //        //test3.Text = Convert.ToString(true);
+                //    }
+                //    if(exec_set_commands("/reader/antenna/1/008setconfig?antennastatus=1&powerlevel=" + Properties.Settings.Default.antena_decibel) == false)
+                //    {
+                //        IOpingflag = false;
+                //        //test3.Text = Convert.ToString(false);
+                //    }
+                //    else
+                //    {
+                //        //test3.Text = Convert.ToString(true);
+                //    }
+                //    if (IOpingflag == true)
+                //    {
+                //        if (button_start_Click_sub() == false)//読み取り開始
+                //        {
+                //            //test3.Text = "処理失敗";
+                //            IOpingflag = false;
+                //            //test3.Text = Convert.ToString(false);
+                //        }
+                //        else
+                //        {
+                //            //test3.Text = "処理成功";
+                //            //test3.Text = Convert.ToString(true);
+                //        }
+                //    }
+                //    //test2.Text = "RFID処理終了" + IOcount;
+                //    if (IOpingflag == false)
+                //    {
+                //        IOflag = false;
+                //        IOCheckflag = false;
+                //        IOmode = 0;
+                //    }
+                //    else
+                //    {
+                //        IOCheckflag = false;
+                //        IOmode = 0;
+                //    }
+                //    //((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(2, Convert.ToString(IOCheckflag));//テストプログラム
+                //    //((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(3, Convert.ToString(IOmode));//テストプログラム
+                //    if (tagreadcnt == 0)
+                //    {
+                //        //test4.Text = "読み取り開始150" + IOcount;
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(20);
+                //    }
+                //    else
+                //    {
+                //        //test4.Text = "読み取り開始200" + IOcount;
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(21);
+                //    }
+                //}
+                //else if (IOCheckflag == true && IOmode == 2 && tagId != "-" && tagId != string.Empty)//開いた時
+                //{
+                //    ////複数よんでいた場合の処理
+                //    //if (multitagflag == true)
+                //    //{
+                //    //    multitagflag = false;
+                //    //    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
+                //    //    //リセット処理
+                //    //    RFIDflag = false;
+                //    //    IOCheckflag = false;
+                //    //    IOmode = 0;
+                //    //    IOflag = false;
+                //    //    IO.Enabled = true;
+                //    //    return;
+                //    //}
+                //    //OperationScreen.Location_x = "5";
+                //    //OperationScreen.Location_y = "5";
+                //    //OperationScreen.Location_z = "1";
+                //    //OperationScreen.tagId = "000023";
+                //    // ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(6);
+                //    ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
+                //    //配替と出庫の判定は全てがブランクかどうか
+                //    if (cdMove == "0" && OperationScreen.Location_x != "-" && OperationScreen.Location_y != "-" && OperationScreen.Location_z != "-")//入庫
+                //    {
+                //        cdMove = "0";
+                //        tagkbn = "入庫";
+                //        フリーエリア判定();
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(15);//入庫
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(5);//移動履歴
+                //    }
+                //    else if (cdMove != "0" && cdMove != "9" && OperationScreen.Location_x != "-" && OperationScreen.Location_y != "-" && OperationScreen.Location_z != "-")//配替
+                //    {
+                //        cdMove = "2";
+                //        tagkbn = "配替";
+                //        フリーエリア判定();
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(16);//配替
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(5);//移動履歴
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(18);//目標コイル取得
+                //    }
+                //    else if (cdMove != "0" && cdMove != "9" && OperationScreen.Location_x == "-" && OperationScreen.Location_y == "-" && OperationScreen.Location_z == "-")//出庫
+                //    {
+                //        cdMove = "1";
+                //        tagkbn = "出庫";
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(17);//出庫
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(5);//移動履歴
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(18);//目標コイル取得
+                //    }
+                //    else if (cdMove == "0" && OperationScreen.Location_x == "-" || OperationScreen.Location_y == "-" || OperationScreen.Location_z == "-")//その他
+                //    {
+                //        //その他の処理
+                //        cdMove = "9";
+                //        tagkbn = "入庫";
+                //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(5);
+                //    }
+                //    else if (cdMove == "9")
+                //    {
+                //        //その他の処理
+                //    }
+                //    else
+                //    {
+                //        MessageBox.Show("ロケーションの値が参照できない為処理が行えませんでした"); //エラー表示
+                //    }
+                //    //リセット処理
+                //    tagdispreset();
+                //    RFIDflag = false;
+                //    disp();
+                //    IOCheckflag = false;
+                //   // ((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(2, Convert.ToString(IOCheckflag));//テストプログラム
+                //    IOmode = 0;
+                //   // ((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(3, Convert.ToString(IOmode));//テストプログラム
+                //    IOflag = false;
+                //    // ((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(4, "タイマー起動");//テストプログラム
+                //    IO.Enabled = true;
+                //}
+                // ((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(4, "タイマー起動");//テストプログラム
+                //----------------------------------------------------------------------------------
 
-            //コメントアウト
-            //if (IOCheckflag == true && IOmode == 1 && tagId == "-")//閉じたとき
-            //{
-            //    //テストプログラム
-            //    //タグ読み取り数.Items.Clear();
-            //    //最終タグ読み取り数.Items.Clear();
-            //    //ここまで
-            //   // IOcount++;
-
-            //    //test1.Text = "RFID処理開始　"+IOcount;
-            //    for (int i = 0; i < tagname.Length; i++)
-            //    {
-            //        tagname[i] = "";
-            //    }
-            //    tagcount = 0;
-
-            //    if(exec_set_commands("/reader/inventory/012setconfig?get_chanid_flg=1&get_phase_flg=1&get_seentime_flg=1&stop_timer=" + Properties.Settings.Default.antena_stoptime) == false)
-            //    {
-            //        IOpingflag = false;
-
-            //        //test3.Text = Convert.ToString(false);
-            //    }
-            //    else
-            //    {
-            //        //test3.Text = Convert.ToString(true);
-            //    }
-
-            //    if(exec_set_commands("/reader/antenna/1/008setconfig?antennastatus=1&powerlevel=" + Properties.Settings.Default.antena_decibel) == false)
-            //    {
-            //        IOpingflag = false;
-
-            //        //test3.Text = Convert.ToString(false);
-            //    }
-            //    else
-            //    {
-            //        //test3.Text = Convert.ToString(true);
-            //    }
-            //    if (IOpingflag == true)
-            //    {
-            //        if (button_start_Click_sub() == false)//読み取り開始
-            //        {
-            //            //test3.Text = "処理失敗";
-            //            IOpingflag = false;
-
-            //            //test3.Text = Convert.ToString(false);
-            //        }
-            //        else
-            //        {
-            //            //test3.Text = "処理成功";
-            //            //test3.Text = Convert.ToString(true);
-            //        }
-            //    }
-            //    //test2.Text = "RFID処理終了" + IOcount;
-            //    if (IOpingflag == false)
-            //    {
-            //        IOflag = false;
-            //        IOCheckflag = false;
-            //        IOmode = 0;
-            //    }
-            //    else
-            //    {
-            //        IOCheckflag = false;
-            //        IOmode = 0;
-            //    }
-
-
-
-            //    //((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(2, Convert.ToString(IOCheckflag));//テストプログラム
-
-            //    //((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(3, Convert.ToString(IOmode));//テストプログラム
-            //    if (tagreadcnt == 0)
-            //    {
-            //        //test4.Text = "読み取り開始150" + IOcount;
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(20);
-            //    }
-            //    else
-            //    {
-            //        //test4.Text = "読み取り開始200" + IOcount;
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(21);
-            //    }
-
-
-            //}
-            //else if (IOCheckflag == true && IOmode == 2 && tagId != "-" && tagId != string.Empty)//開いた時
-            //{
-            //    ////複数よんでいた場合の処理
-            //    //if (multitagflag == true)
-            //    //{
-            //    //    multitagflag = false;
-            //    //    ((MainScreen)Application.OpenForms["MainScreen"]).Show_Message(0);
-            //    //    //リセット処理
-            //    //    RFIDflag = false;
-            //    //    IOCheckflag = false;
-            //    //    IOmode = 0;
-            //    //    IOflag = false;
-            //    //    IO.Enabled = true;
-            //    //    return;
-            //    //}
-
-            //    //OperationScreen.Location_x = "5";
-            //    //OperationScreen.Location_y = "5";
-            //    //OperationScreen.Location_z = "1";
-            //    //OperationScreen.tagId = "000023";
-            //    // ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(6);
-
-            //    ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(14);
-            //    //配替と出庫の判定は全てがブランクかどうか
-            //    if (cdMove == "0" && OperationScreen.Location_x != "-" && OperationScreen.Location_y != "-" && OperationScreen.Location_z != "-")//入庫
-            //    {
-            //        cdMove = "0";
-            //        tagkbn = "入庫";
-            //        フリーエリア判定();
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(15);//入庫
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(5);//移動履歴
-            //    }
-            //    else if (cdMove != "0" && cdMove != "9" && OperationScreen.Location_x != "-" && OperationScreen.Location_y != "-" && OperationScreen.Location_z != "-")//配替
-            //    {
-            //        cdMove = "2";
-            //        tagkbn = "配替";
-            //        フリーエリア判定();
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(16);//配替
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(5);//移動履歴
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(18);//目標コイル取得
-            //    }
-            //    else if (cdMove != "0" && cdMove != "9" && OperationScreen.Location_x == "-" && OperationScreen.Location_y == "-" && OperationScreen.Location_z == "-")//出庫
-            //    {
-            //        cdMove = "1";
-            //        tagkbn = "出庫";
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(17);//出庫
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(5);//移動履歴
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(18);//目標コイル取得
-            //    }
-            //    else if (cdMove == "0" && OperationScreen.Location_x == "-" || OperationScreen.Location_y == "-" || OperationScreen.Location_z == "-")//その他
-            //    {
-            //        //その他の処理
-            //        cdMove = "9";
-            //        tagkbn = "入庫";
-            //        ((MainScreen)Application.OpenForms["MainScreen"]).OracleDBsql(5);
-            //    }
-            //    else if (cdMove == "9")
-            //    {
-            //        //その他の処理
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show("ロケーションの値が参照できない為処理が行えませんでした"); //エラー表示
-            //    }
-
-            //    //リセット処理
-            //    tagdispreset();
-            //    RFIDflag = false;
-            //    disp();
-            //    IOCheckflag = false;
-            //   // ((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(2, Convert.ToString(IOCheckflag));//テストプログラム
-
-            //    IOmode = 0;
-            //   // ((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(3, Convert.ToString(IOmode));//テストプログラム
-            //    IOflag = false;
-
-            //    // ((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(4, "タイマー起動");//テストプログラム
-            //    IO.Enabled = true;
-            //}
-
-            // ((OperationScreen)Application.OpenForms["OperationScreen"]).test_text(4, "タイマー起動");//テストプログラム
-            //----------------------------------------------------------------------------------
-
-            IO.Enabled = true;
-
+                //IO.Enabled = true; //finallyブロックに移動 2026/03/27 OGURI DEL（ver1.1.0.0対応）
+            }
+            finally
+            {
+                IO.Enabled = true;
+                _ioProcessing = false;
+            }
         }
 
         //2024.06.17 morichika
