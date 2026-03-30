@@ -1,0 +1,162 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TC_CoilOperation.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Inverted_Value_X" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="Inverted_Value_Y" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">20000</Value>
+    </Setting>
+    <Setting Name="Inverted_Value_Z" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">8000</Value>
+    </Setting>
+    <Setting Name="Offset_Value_X" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">-3200</Value>
+    </Setting>
+    <Setting Name="Offset_Value_Y" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="Offset_Value_Z" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="Lifter_Signal_Interval" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="Lifter_Signal_ON_Judgment" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="Lifter_Signal_OFF_Judgment" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="Lifter_Manualmode" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="BackNum" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="Oracle_UserID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">COIL</Value>
+    </Setting>
+    <Setting Name="Oracle_UserPass" Type="System.String" Scope="User">
+      <Value Profile="(Default)">COIL</Value>
+    </Setting>
+    <Setting Name="Oracle_ServiceName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">COIL</Value>
+    </Setting>
+    <Setting Name="Add_day" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">7</Value>
+    </Setting>
+    <Setting Name="xport_name" Type="System.String" Scope="User">
+      <Value Profile="(Default)">COM22</Value>
+    </Setting>
+    <Setting Name="yport_name" Type="System.String" Scope="User">
+      <Value Profile="(Default)">com23</Value>
+    </Setting>
+    <Setting Name="zport_name" Type="System.String" Scope="User">
+      <Value Profile="(Default)">com24</Value>
+    </Setting>
+    <Setting Name="xbaudrate" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">9600</Value>
+    </Setting>
+    <Setting Name="ybaudrate" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">9600</Value>
+    </Setting>
+    <Setting Name="zbaudrate" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">9600</Value>
+    </Setting>
+    <Setting Name="xdatabit" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">8</Value>
+    </Setting>
+    <Setting Name="ydatabit" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">8</Value>
+    </Setting>
+    <Setting Name="zdatabit" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">8</Value>
+    </Setting>
+    <Setting Name="Lifter_DIOid" Type="System.String" Scope="User">
+      <Value Profile="(Default)">DIO000000</Value>
+    </Setting>
+    <Setting Name="antena_decibel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">150</Value>
+    </Setting>
+    <Setting Name="antena_stoptime" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="XcomIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="ZcomIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="DIOcomIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="MP3_1" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\\Users\\20001\\Desktop\\coilsound\\警告音1.mp3</Value>
+    </Setting>
+    <Setting Name="MP3_2" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\\Users\\20001\\Desktop\\coilsound\\警告音2.mp3</Value>
+    </Setting>
+    <Setting Name="YardID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B2</Value>
+    </Setting>
+    <Setting Name="YcomIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="tagID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0665-7477-4100</Value>
+    </Setting>
+    <Setting Name="RFIDcomIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">169.254.200.100</Value>
+    </Setting>
+    <Setting Name="XTimeout" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="YTimeout" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5000</Value>
+    </Setting>
+    <Setting Name="ZTimeout" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5000</Value>
+    </Setting>
+    <Setting Name="Shutdownpass" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Windows\System32\shutdown.exe</Value>
+    </Setting>
+    <Setting Name="antena_decibel_A" Type="System.String" Scope="User">
+      <Value Profile="(Default)">160</Value>
+    </Setting>
+    <Setting Name="antena_decibel_B" Type="System.String" Scope="User">
+      <Value Profile="(Default)">170</Value>
+    </Setting>
+    <Setting Name="antena_decibel_C" Type="System.String" Scope="User">
+      <Value Profile="(Default)">180</Value>
+    </Setting>
+    <Setting Name="antena_decibel_D" Type="System.String" Scope="User">
+      <Value Profile="(Default)">190</Value>
+    </Setting>
+    <Setting Name="antena_decibel_E" Type="System.String" Scope="User">
+      <Value Profile="(Default)">200</Value>
+    </Setting>
+    <Setting Name="X_sikiti" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="Y_sikiti" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="Z_sikiti" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="IDYARD" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="Free_X" Type="System.String" Scope="User">
+      <Value Profile="(Default)">36</Value>
+    </Setting>
+    <Setting Name="Free_manual_mode" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="重複Y調整値" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">500</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -1,0 +1,324 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C5D7EED9-203D-44E9-A3EE-ECFA199696FD}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>TC_CoilOperation</RootNamespace>
+    <AssemblyName>TC_CoilOperation</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>46441ca5084b601c8bba7acac7068916_ol.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Oracle.DataAccess, Version=4.122.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\app\client\20001\product\12.2.0\client_1\ODP.NET\bin\2.x\Oracle.DataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ccapdio.cs" />
+    <Compile Include="CoilShowDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CoilShowDialog.Designer.cs">
+      <DependentUpon>CoilShowDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="COIL_info.cs" />
+    <Compile Include="Detail View.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Detail View.Designer.cs">
+      <DependentUpon>Detail View.cs</DependentUpon>
+    </Compile>
+    <Compile Include="lazercls.cs" />
+    <Compile Include="Lbl_Col_No.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Lbl_Col_No.Designer.cs">
+      <DependentUpon>Lbl_Col_No.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MachineCheck.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MachineCheck.Designer.cs">
+      <DependentUpon>MachineCheck.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Menu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Menu.Designer.cs">
+      <DependentUpon>Menu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="multicoil.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="multicoil.Designer.cs">
+      <DependentUpon>multicoil.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Numeric keypad.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Numeric keypad.Designer.cs">
+      <DependentUpon>Numeric keypad.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperationScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OperationScreen.Designer.cs">
+      <DependentUpon>OperationScreen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainScreen.Designer.cs">
+      <DependentUpon>MainScreen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="coil.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="coil.Designer.cs">
+      <DependentUpon>coil.cs</DependentUpon>
+    </Compile>
+    <Compile Include="setting Device.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="setting Device.Designer.cs">
+      <DependentUpon>setting Device.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Shipping information.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Shipping information.Designer.cs">
+      <DependentUpon>Shipping information.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ylazercls.cs" />
+    <Compile Include="Zlazercls.cs" />
+    <Compile Include="フリーエリア_確認画面.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="フリーエリア_確認画面.Designer.cs">
+      <DependentUpon>フリーエリア_確認画面.cs</DependentUpon>
+    </Compile>
+    <Compile Include="フリーエリア画面.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="フリーエリア画面.Designer.cs">
+      <DependentUpon>フリーエリア画面.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="CoilShowDialog.resx">
+      <DependentUpon>CoilShowDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Detail View.resx">
+      <DependentUpon>Detail View.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Lbl_Col_No.resx">
+      <DependentUpon>Lbl_Col_No.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MachineCheck.resx">
+      <DependentUpon>MachineCheck.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Menu.resx">
+      <DependentUpon>Menu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="multicoil.resx">
+      <DependentUpon>multicoil.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Numeric keypad.resx">
+      <DependentUpon>Numeric keypad.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OperationScreen.resx">
+      <DependentUpon>OperationScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainScreen.resx">
+      <DependentUpon>MainScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="coil.resx">
+      <DependentUpon>coil.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="setting Device.resx">
+      <DependentUpon>setting Device.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Shipping information.resx">
+      <DependentUpon>Shipping information.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="フリーエリア_確認画面.resx">
+      <DependentUpon>フリーエリア_確認画面.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="フリーエリア画面.resx">
+      <DependentUpon>フリーエリア画面.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\図4.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\コイル画像.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\詳細画面0513.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test赤.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test赤１.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test赤2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\青.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\黄色.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\緑.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\列情報0513.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\コイル詳細.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test5.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\coil.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test6.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test7.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test71.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\プレゼンテーション1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\プレゼンテーション11.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test_coil.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\2test.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\3test.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\4test.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\5test.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\6test.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\7test.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\coilLINE.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="WMPLib">
+      <Guid>{6BF52A50-394A-11D3-B153-00C04F79FAA6}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="46441ca5084b601c8bba7acac7068916_ol.ico" />
+    <None Include="Resources\無題.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
