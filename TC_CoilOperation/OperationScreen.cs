@@ -1086,7 +1086,7 @@ namespace TC_CoilOperation
                 //----------------------------
                 //2026/3/13 morichika
                 //if (Xvalue != -99999)
-                if (Xvalue != -99999|| Xvalue != -99998)
+                if (Xvalue != -99999 && Xvalue != -99998)
                 //----------------------------
                 {
                     if (Properties.Settings.Default.Inverted_Value_X == 0)
@@ -1102,7 +1102,7 @@ namespace TC_CoilOperation
                 //----------------------------
                 //2026/3/13 morichika
                 //if (Yvalue != -99999)
-                if (Yvalue != -99999|| Yvalue != -99998)
+                if (Yvalue != -99999 && Yvalue != -99998)
                 //----------------------------
                 {
                     if (Properties.Settings.Default.Inverted_Value_Y == 0)
@@ -1118,7 +1118,7 @@ namespace TC_CoilOperation
                 //----------------------------
                 //2026/3/13 morichika
                 //if (Zvalue != -99999)
-                if (Zvalue != -99999|| Zvalue != -99998)
+                if (Zvalue != -99999 && Zvalue != -99998)
                 //----------------------------
                 {
                     if (Properties.Settings.Default.Inverted_Value_Z == 0)
